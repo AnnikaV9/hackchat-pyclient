@@ -19,3 +19,4 @@ python3 hcclient
 
 
 Color and style compatibility will vary on different terminals.
+
