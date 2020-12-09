@@ -6,6 +6,7 @@
 import json
 import threading
 import websocket
+import colorama
 from time import sleep
 from termcolor import colored
 
@@ -92,6 +93,7 @@ if __name__ == "__main__":
     client = Client(nick=nick_to_use,
                     channel=channel_to_join,
                     target_websocket="wss://hack.chat/chat-ws")
+    colorama.init()
     client.thread_main.start()
     client.thread_ping.start()
     client.thread_input.start()
