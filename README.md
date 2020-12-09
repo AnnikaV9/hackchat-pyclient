@@ -10,7 +10,6 @@ Python3
 ```
 pip3 uninstall websocket
 pip3 install websocket-client
-pip3 install termcolor
 pip3 install colorama
 
 git clone https://github.com/AnnikaV9/hackchat-pyclient.git
@@ -19,4 +18,4 @@ python3 hcclient
 ```
 
 
-Termcolor color and style compatibility will vary on different terminals.
+Color and style compatibility will vary on different terminals.
