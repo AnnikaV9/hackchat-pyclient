@@ -28,7 +28,7 @@ class Client:
         self.ws.send(json.dumps({"cmd": "join", "channel": channel, "nick": nick}))
 
         print("\n\nYou are now connected to the channel: {}".format(channel))
-        print("Type '/list' to see who's online.".format(self.online_users))
+        print("Type '/list' to see who's online.\n\n".format(self.online_users))
 
         self.thread_ping = threading.Thread(target=self.ping_thread)
         self.thread_input = threading.Thread(target=self.input_thread)
