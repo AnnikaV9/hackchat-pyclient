@@ -11,6 +11,7 @@ Python3
 pip3 uninstall websocket
 pip3 install websocket-client
 pip3 install termcolor
+pip3 install colorama
 
 git clone https://github.com/AnnikaV9/hackchat-pyclient.git
 cd hackchat-pyclient
