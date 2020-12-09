@@ -4,11 +4,8 @@
 
 
 import json
-import requests
 import threading
-import random
 import websocket
-import socket
 from time import sleep
 from termcolor import colored
 
