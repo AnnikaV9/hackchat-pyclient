@@ -77,16 +77,16 @@ class Client:
                 colored_emote = color_list.GREEN + received["text"] + color_list.END
 
                 if received["nick"] != self.nick:
-                    print("{}| {}".format(received.get("trip", ""),
+                    print("{}|{}".format(received.get("trip", ""),
                                           colored_emote))                    
                 else:
-                    print("{}{}| {}".format(you_text, 
+                    print("{}{}|{}".format(you_text, 
                                             received.get("trip", ""),
                                             colored_emote))
                     
             elif received["cmd"] == "info" and received.get("type") is not None and received.get("type") == "whisper": 
                 colored_whisper = color_list.YELLOW + received["text"] + color_list.END
-                print("{}| {}".format(received.get("trip", ""),
+                print("{}|{}".format(received.get("trip", ""),
                                       colored_whisper))
                 
                    
