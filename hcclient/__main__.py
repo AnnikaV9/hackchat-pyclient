@@ -7,7 +7,7 @@ import json
 import threading
 import websocket
 import colorama
-import os
+from os import system, name
 from datetime import datetime
 from time import sleep
 
@@ -27,11 +27,14 @@ class Client:
         self.full_nick = "{}#{}".format(nick, password)
         self.ws = websocket.create_connection(target_websocket)
         self.ws.send(json.dumps({"cmd": "join", "channel": channel, "nick": self.full_nick}))
-        os.system('cls' if os.name == 'nt' else 'clear')
+
+        system('cls' if name == 'nt' else 'clear')
+
         print("You are now connected to the channel: {}".format(color_list.RED +
                                                                     channel +
                                                                     color_list.END))
         print("Type '/list' to see who's online.\n\n".format(self.online_users))
+
         self.thread_ping = threading.Thread(target=self.ping_thread)
         self.thread_input = threading.Thread(target=self.input_thread)
         self.thread_main = threading.Thread(target=self.main_thread)
@@ -68,21 +71,37 @@ class Client:
                                                  received["text"]))
 
             elif received["cmd"] == "onlineAdd":
+
+                if len(received.get("trip", "")) < 6:
+                    tripcode = "NOTRIP"
+
+                else:
+                    tripcode = received.get("trip", "")
+                
+                colored_trip = color_list.WHITE + tripcode + color_list.END
                 self.online_users.append(received["nick"])
-                print("{}|".format(packet_receive_time) +
+                print("{}|{}|".format(packet_receive_time, colored_trip) +
                       color_list.GREEN +
-                      "{} joined (Trip: {})".format(received["nick"],
-                                                    received.get("trip", "")) + 
+                      "{} joined".format(received["nick"]) + 
                       color_list.END)
                     
             elif received["cmd"] == "onlineRemove":                
+
+                if len(received.get("trip", "")) < 6:
+                    tripcode = "NOTRIP"
+
+                else:
+                    tripcode = received.get("trip", "")
+                
+                colored_trip = color_list.WHITE + tripcode + color_list.END
                 self.online_users.remove(received["nick"])
-                print("{}|".format(packet_receive_time) +
+                print("{}|{}|".format(packet_receive_time, colored_trip) +
                       color_list.GREEN +
                       "{} left".format(received["nick"]) +
                       color_list.END)
             
             elif received["cmd"] == "onlineSet":                
+
                 for nick in received["nicks"]:                    
                     self.online_users.append(nick)
             
@@ -100,7 +119,6 @@ class Client:
                 print("{}|{}|{}".format(packet_receive_time,
                                         colored_trip,
                                         colored_emote))                    
-
                     
             elif received["cmd"] == "info" and received.get("type") is not None and received.get("type") == "whisper": 
 
@@ -117,7 +135,6 @@ class Client:
                                         colored_whisper))
             
             elif received["cmd"] == "info":
-
                 if len(received.get("trip", "")) < 6:
                     tripcode = "NOTRIP"
 
