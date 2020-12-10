@@ -166,10 +166,13 @@ class Client:
         while self.ws.connected:
                         
             message = str(input())
-            self.ws.send(json.dumps({"cmd": "chat", "text": message}))                       
 
             if message == "/list":
                 print("\n\nOnline users:\n{}\n\n".format("\n".join(map(str, self.online_users))))
+             
+            else:
+                self.ws.send(json.dumps({"cmd": "chat", "text": message}))                       
+
 
 
 
