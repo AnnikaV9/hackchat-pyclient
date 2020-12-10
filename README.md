@@ -29,6 +29,6 @@ join/leave: green
 emote: green
 tripcode: white
 warn: yellow
-info: yellow 
+system: yellow 
 ```
 Color compatibility may vary on different terminals.
