@@ -18,5 +18,17 @@ python3 hcclient
 ```
 
 
-Color and style compatibility will vary on different terminals.
-
+## Expected colors
+```
+message: terminal default
+timestamp: terminal default
+nick(you): red
+nick(others): cyan
+whisper: yellow
+join/leave: green
+emote: green
+tripcode: white
+warn: yellow
+info: yellow 
+```
+Color compatibility may vary on different terminals.
