@@ -1,5 +1,5 @@
 # hackchat-pyclient
-A python tkinter gui client for connecting to hack.chat servers.
+A tkinter gui client for connecting to hack.chat servers.
 
 
 ## Requirements
