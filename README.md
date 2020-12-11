@@ -4,6 +4,8 @@ A python tkinter gui client for connecting to hack.chat servers.
 
 ## Requirements
 Python3
+
+
 Python3-tkinter
 
 
