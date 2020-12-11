@@ -19,7 +19,7 @@ class Client:
         self.main_window = tk.Frame(root, height=50, width=100)
         self.main_window.pack(fill=Y, expand=True)
         self.scrollbar = Scrollbar(self.main_window)
-        self.output_box = tk.Text(self.main_window, height=30, width=100, yscrollcommand=self.scrollbar.set, bg='black', fg='white')
+        self.output_box = tk.Text(self.main_window, height=30, width=100, yscrollcommand=self.scrollbar.set, bg="black", fg="white")
         self.output_box.config(state='disabled')
         self.output_box.bind("<Button>", lambda event: self.output_box.focus_set())
         self.input_box = tk.Text(self.main_window, height=1, width=102, bg='white', fg='black')
@@ -28,13 +28,17 @@ class Client:
         self.scrollbar.config(command=self.output_box.yview)
         self.scrollbar.pack(side=RIGHT, fill=Y)
         self.output_box.pack(side='top')
+        self.output_box.tag_config("system", background="black", foreground="lime")
+        self.output_box.tag_config("whisper", background="black", foreground="yellow")
+        self.output_box.tag_config("normal", background="black", foreground="white")
+        self.output_box.tag_config("joinleave", background="black", foreground="cyan")
         self.nick = nick
         self.channel = channel
         self.online_users = []
         self.full_nick = "{}#{}".format(nick, password)
         self.ws = websocket.create_connection(target_websocket)
         self.ws.send(json.dumps({"cmd": "join", "channel": channel, "nick": self.full_nick}))
-        self.refresh_display(text="You are now connected to the channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(channel))
+        self.refresh_display(text="You are now connected to channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(channel), tag="normal")
         self.thread_ping = threading.Thread(target=self.ping_thread, daemon=True)
         self.thread_input = threading.Thread(target=self.input_thread, daemon=True)
         self.thread_main = threading.Thread(target=self.main_thread, daemon=True)
@@ -57,7 +61,7 @@ class Client:
                                                        tripcode,
                                                        received["nick"],
                                                        received["text"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="normal")
 
             elif received["cmd"] == "onlineAdd":
 
@@ -71,7 +75,7 @@ class Client:
                 text_to_print = "{}|{}|{} joined".format(packet_receive_time,
                                                          tripcode,
                                                          received["nick"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="joinleave")
                     
             elif received["cmd"] == "onlineRemove":                
 
@@ -85,7 +89,7 @@ class Client:
                 text_to_print = "{}|{}|{} left".format(packet_receive_time,
                                                        tripcode,
                                                        received["nick"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="joinleave")
             
             elif received["cmd"] == "onlineSet":                
 
@@ -103,7 +107,7 @@ class Client:
                 text_to_print = "{}|{}|{}".format(packet_receive_time,
                                                   tripcode,
                                                   received["text"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="system")
                     
             elif received["cmd"] == "info" and received.get("type") is not None and received.get("type") == "whisper": 
 
@@ -116,7 +120,7 @@ class Client:
                 text_to_print = "{}|{}|{}".format(packet_receive_time,
                                                   tripcode,
                                                   received["text"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="whisper")
 
             
             elif received["cmd"] == "info":
@@ -124,14 +128,14 @@ class Client:
                 text_to_print = "{}|{}|{}".format(packet_receive_time,
                                                   "SYSTEM",
                                                   received["text"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="system")
  
             elif received["cmd"] == "warn":
 
                 text_to_print = "{}|{}|{}".format(packet_receive_time,
                                                      "!WARN!",
                                                      received["text"])
-                self.refresh_display(text=text_to_print)
+                self.refresh_display(text=text_to_print, tag="whisper")
 
                    
     def ping_thread(self):        
@@ -145,10 +149,10 @@ class Client:
          self.input_box.bind('<Return>', lambda _: self.send_input())
 
         
-    def refresh_display(self, text):
-        self.output_box.config(state='normal')
-        self.output_box.insert('end', text+"\n")
-        self.output_box.config(state='disabled')
+    def refresh_display(self, text, tag):
+        self.output_box.config(state="normal")
+        self.output_box.insert("end", text+"\n", tag)
+        self.output_box.config(state="disabled")
         self.output_box.yview_moveto( 1 ) 
 
                     
@@ -170,20 +174,26 @@ class Client:
                 self.ws.send(json.dumps(json_to_send))
 
             except:
-                self.refresh_display(text="\nError sending json")
+                self.refresh_display(text="\nError sending json", tag="whisper")
         
         elif message == "/list":
             user_list = "\n\nChannel: {}\nOnline users:\n{}\n\n".format(channel, "\n".join(map(str, self.online_users)))
             self.input_box.delete("1.0", END)
-            self.refresh_display(text=user_list)
+            self.refresh_display(text=user_list, tag="system")
+        
+        elif message == "/clear":
+            self.input_box.delete("1.0", END)
+            self.output_box.config(state="normal")
+            self.output_box.delete("1.0", END)
+            self.output_box.config(state="disabled")
 
         else:
             self.input_box.delete("1.0", END)
             self.ws.send(json.dumps({"cmd": "chat", "text": message}))     
 
             if message == "/help":
-                extra_text = "\n\nAll '/n/' will be converted into linebreaks\n\nRaw json packets can be sent with '/raw'\nUsage: /raw <json>\n\nUser list can be viewed with '/list'\nUsage: /list\n\n"
-                self.refresh_display(text=extra_text)
+                extra_text = "\n\nAll '/n/' will be converted into linebreaks\n\nRaw json packets can be sent with '/raw'\nUsage: /raw <json>\n\nUser list can be viewed with '/list'\nUsage: /list\n\nDisplay can be cleared with '/clear'\nUsage: /clear\n\n"
+                self.refresh_display(text=extra_text, tag="system")
         
    
 if __name__ == "__main__":
