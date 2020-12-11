@@ -34,7 +34,7 @@ class Client:
         self.full_nick = "{}#{}".format(nick, password)
         self.ws = websocket.create_connection(target_websocket)
         self.ws.send(json.dumps({"cmd": "join", "channel": channel, "nick": self.full_nick}))
-        self.refresh_display(text="You are now connected to channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(channel))
+        self.refresh_display(text="You are now connected to the channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(channel))
         self.thread_ping = threading.Thread(target=self.ping_thread, daemon=True)
         self.thread_input = threading.Thread(target=self.input_thread, daemon=True)
         self.thread_main = threading.Thread(target=self.main_thread, daemon=True)
