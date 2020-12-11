@@ -201,6 +201,7 @@ if __name__ == "__main__":
     nick = input("Nick: ")
     password = input("Password(optional): ")
     root = tk.Tk()
+    root.iconphoto(False, tk.PhotoImage(file='icon.png'))
     root.title("hcclient")
     client = Client(root=root,
                     nick=nick,
