@@ -1,5 +1,4 @@
 """
-No copyright, licenses or whatever
 Edit 'target_websocket' within the Client class to access personal servers
 """
 
