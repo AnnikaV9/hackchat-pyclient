@@ -16,3 +16,9 @@ git clone https://github.com/AnnikaV9/hackchat-pyclient.git
 cd hackchat-pyclient
 python3 hcclient
 ```
+<br/>
+
+To view raw json packets received from the server:
+```
+python3 hcclient --no-parse
+```
