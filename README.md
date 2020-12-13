@@ -18,7 +18,7 @@ python3 hcclient
 ```
 <br/>
 
-To view raw json packets received from the server:
+To view received jsons raw:
 ```
 python3 hcclient --no-parse
 ```
