@@ -1,5 +1,24 @@
 """
-Edit 'target_websocket' within the Client class to access personal servers
+Copyright (c) 2020 AnnikaV9
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 """
 
 
@@ -7,6 +26,7 @@ import json
 import threading
 import websocket
 import sys
+import re
 import tkinter as tk
 from tkinter import *
 from os import system, name
@@ -64,7 +84,7 @@ class Client:
                                    background="black",
                                    foreground="cyan")
         self.nick = nick
-        self.channel = channel
+        self.root = root
         self.online_users = []
         self.full_nick = "{}#{}".format(nick,
                                         password)
@@ -91,14 +111,25 @@ class Client:
                 if sys.argv[1] == "--no-parse":
                     text_to_print = "\n{}|{}".format(packet_receive_time,
                                                      received)
-                    self.refresh_display(text=text_to_print, tag="normal")
+                    self.refresh_display(text=text_to_print, tag="WhiteOnBlack")
 
                 else:
                     self.refresh_display(text="\n\nUnknown parameter: {}".format(sys.argv[1]), tag="whisper")
 
             # An IndexError is given if no parameters are entered, enabling parsing
             except IndexError as e:
-                if received["cmd"] == "chat":
+                if received["cmd"] == "onlineSet":
+
+                    for nick in received["nicks"]:
+                        if self.nick in self.online_users:
+                            self.online_users.remove(self.nick)
+                        self.online_users.append(nick)                        
+                        self.channel = received["users"][0]["channel"]
+                    self.refresh_display(text="You are now connected to channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(self.channel),
+                    tag="normal")
+                    self.root.title("hack.chat - ?{}".format(self.channel))
+
+                elif received["cmd"] == "chat":
 
                     if len(received.get("trip", "")) < 6:
                         tripcode = "NOTRIP"
@@ -110,7 +141,7 @@ class Client:
                                                            received["nick"],
                                                            received["text"])
                     self.refresh_display(text=text_to_print,
-                                         tag="normal")
+                                         tag="WhiteOnBlack")
 
                 elif received["cmd"] == "onlineAdd":
 
@@ -125,7 +156,7 @@ class Client:
                                                              tripcode,
                                                              received["nick"])
                     self.refresh_display(text=text_to_print,
-                                         tag="joinleave")
+                                         tag="CyanOnBlack")
 
                 elif received["cmd"] == "onlineRemove":
 
@@ -140,15 +171,7 @@ class Client:
                                                            tripcode,
                                                            received["nick"])
                     self.refresh_display(text=text_to_print,
-                                         tag="joinleave")
-
-                elif received["cmd"] == "onlineSet":
-
-                    for nick in received["nicks"]:
-                        self.online_users.append(nick)
-
-                    self.refresh_display(text="You are now connected to channel: {}\nType '/help' for a list of commands you can use with this client\n\n".format(received["channel"]),
-                    tag="normal")
+                                         tag="CyanOnBlack")
 
                 elif received["cmd"] == "emote":
 
@@ -162,7 +185,7 @@ class Client:
                                                       tripcode,
                                                       received["text"])
                     self.refresh_display(text=text_to_print,
-                                         tag="system")
+                                         tag="LimeOnBlack")
 
                 elif received["cmd"] == "info" and received.get("type") is not None and received.get("type") == "whisper":
 
@@ -176,7 +199,7 @@ class Client:
                                                       tripcode,
                                                       received["text"])
                     self.refresh_display(text=text_to_print,
-                                         tag="whisper")
+                                         tag="YellowOnBlack")
 
                 elif received["cmd"] == "info":
 
@@ -184,7 +207,7 @@ class Client:
                                                       "SYSTEM",
                                                       received["text"])
                     self.refresh_display(text=text_to_print,
-                                         tag="system")
+                                         tag="LimeOnBlack")
 
                 elif received["cmd"] == "warn":
 
@@ -192,7 +215,7 @@ class Client:
                                                       "!WARN!",
                                                       received["text"])
                     self.refresh_display(text=text_to_print,
-                                         tag="whisper")
+                                         tag="YellowOnBlack")
 
     # Ping thread to keep the websocket connection alive
     def ping_thread(self):
@@ -225,7 +248,6 @@ class Client:
         message = ' '.join(listed)
         message = message.replace("/n/",
                                   "\n")
-        check = ''.join(listed)
 
         if message.split()[0] == "/raw":
             split_message = message.split()
@@ -240,24 +262,57 @@ class Client:
 
             except:
                 self.refresh_display(text="\nError sending json",
-                                     tag="whisper")
+                                     tag="YellowOnBlack")
 
         elif message == "/list":
-            user_list = "\n\nChannel: {}\nOnline users:\n{}\n\n".format(channel,
+            user_list = "\n\nChannel: {}\nOnline users:\n{}\n\n".format(self.channel,
                                                                         "\n".join(map(str,
                                                                                       self.online_users)))
             self.input_box.delete("1.0",
                                   END)
             self.refresh_display(text=user_list,
-                                 tag="system")
+                                 tag="LimeOnBlack")
 
         elif message == "/clear":
             self.input_box.delete("1.0",
                                   END)
-            self.output_box.config(state="normal")
+            self.output_box.config(state="WhiteOnBlack")
             self.output_box.delete("1.0",
                                    END)
             self.output_box.config(state="disabled")
+
+        elif message.split()[0] == "/move":
+            split_message = message.split()
+            split_message.pop(0)
+            channel_to_join = ' '.join(split_message)
+            self.input_box.delete("1.0",
+                                  END)
+            self.ws.send(json.dumps({"cmd": "move",
+                                     "channel": channel_to_join}))
+
+        elif message.split()[0] == "/nick":
+            split_message = message.split()
+            split_message.pop(0)
+            nick_to_change = ''.join(split_message)
+            self.input_box.delete("1.0",
+                                  END)
+            if re.match("^[A-Za-z0-9_]*$",
+                        nick_to_change):
+                self.ws.send(json.dumps({"cmd": "changenick",
+                                         "nick": nick_to_change}))
+                self.nick = nick_to_change
+            else:
+                self.ws.send(json.dumps({"cmd": "changenick",
+                                         "nick": nick_to_change}))
+
+        elif message.split()[0] == "/me":
+            split_message = message.split()
+            split_message.pop(0)
+            message_to_send = ' '.join(split_message)
+            self.input_box.delete("1.0",
+                                  END)
+            self.ws.send(json.dumps({"cmd": "emote",
+                                     "text": message_to_send}))
 
         else:
             self.input_box.delete("1.0",
@@ -266,9 +321,9 @@ class Client:
                                      "text": message}))
 
             if message == "/help":
-                extra_text = "\n\nAll '/n/' will be converted into linebreaks\n\nRaw json packets can be sent with '/raw'\nUsage: /raw <json>\n\nUser list can be viewed with '/list'\nUsage: /list\n\nDisplay can be cleared with '/clear'\nUsage: /clear\n\n"
+                extra_text = "\n\nAll '/n/' will be converted into linebreaks\n\nRaw json packets can be sent with '/raw'\nUsage: /raw <json>\n\nUser list can be viewed with '/list'\nUsage: /list\n\nDisplay can be cleared with '/clear'\nUsage: /clear\n\nChannel can be changed with '/move'\nUsage: /move <newchannel>\n\nNickname can be changed with '/nick'\nUsage: /nick <newnick>\n\nAction messages can be sent with '/me'\nUsage: /me <message>\n\nWhispers can be sent with '/whisper'\nUsage: /whisper <user> <message> or /w <user> <message>\n\nUse '/reply' no reply to the user who last whispered to you\nUsage: /reply <message> or /r <message>\n\n"
                 self.refresh_display(text=extra_text,
-                                     tag="system")
+                                     tag="LimeOnBlack")
 
 
 if __name__ == "__main__":
@@ -282,6 +337,7 @@ if __name__ == "__main__":
                     nick=nick,
                     password=password,
                     channel=channel,
+                    # Change to connect to personal servers
                     target_websocket="wss://hack.chat/chat-ws")
     root.resizable(False,
                    False)
