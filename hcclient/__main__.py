@@ -29,7 +29,6 @@ import sys
 import re
 import tkinter as tk
 from tkinter import *
-from os import system, name
 from datetime import datetime
 from time import sleep
 
