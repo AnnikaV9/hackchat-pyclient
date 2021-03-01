@@ -116,7 +116,7 @@ class Client:
                     self.refresh_display(text="\n\nUnknown parameter: {}".format(sys.argv[1]), tag="whisper")
 
             # An IndexError is given if no parameters are entered, enabling parsing
-            except IndexError as e:
+            except IndexError:
                 if received["cmd"] == "onlineSet":
 
                     for nick in received["nicks"]:
