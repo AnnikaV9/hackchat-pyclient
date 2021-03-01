@@ -9,7 +9,7 @@ Python3-tkinter
 
 ## Setup and Usage
 ```
-pip3 uninstall websocket
+pip3 uninstall websockets
 pip3 install websocket-client
 
 git clone https://github.com/AnnikaV9/hackchat-pyclient.git
